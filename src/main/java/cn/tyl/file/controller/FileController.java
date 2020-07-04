@@ -93,6 +93,14 @@ public class FileController {
     }
 
 
+    /**
+     * 下载文件
+     * @param downFileName
+     * @param parentPath
+     * @param response
+     * @return
+     * @throws UnsupportedEncodingException
+     */
     @GetMapping("/download/{downFileName}")
     public String downLoad(@PathVariable String downFileName,
                            @RequestParam("parentPath") String parentPath,
@@ -142,4 +150,37 @@ public class FileController {
         }
         return null;
     }
+
+
+    /**
+     * 重命名文件
+     * @param oldName
+     * @param parentPath
+     * @param response
+     * @return
+     * @throws UnsupportedEncodingException
+     */
+    @GetMapping("/rename")
+    public String rename(@RequestParam("oldName") String oldName,
+                           @RequestParam(value = "parentPath",required = false) String parentPath,
+                           @RequestParam("newName") String newName,
+                           HttpServletResponse response)
+            throws UnsupportedEncodingException {
+
+        if (StringUtils.isEmpty(parentPath)){
+            parentPath="";
+        }
+        String filename = oldName;
+        String filePath = basePath+parentPath;
+        File oldfile = new File(filePath + "/" + filename);
+        File newFile =  new File(filePath+"/"+newName);
+        if (oldfile.exists()) {
+            //判断文件父目录是否存在
+
+            oldfile.renameTo(newFile);
+        }
+
+        return "redirect:/file?parentPath="+parentPath;
+    }
+
 }

@@ -6,7 +6,8 @@ spring:
       charset: UTF-8
       enabled: true
       force: true
-
+  thymeleaf:
+    cache: false
 
 
   servlet:
