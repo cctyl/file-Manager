@@ -55,7 +55,7 @@ public class FileController {
 
 
         if (!StringUtils.isEmpty(childPath)) {
-            parentPath +=  childPath+"/";
+            parentPath +=  "/"+childPath+"/";
         }
         String inputPath =basePath+ parentPath;
 

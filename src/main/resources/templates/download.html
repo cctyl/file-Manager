@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
-    <script th:src="@{/js/jquery/jquery.min.js}"></script>
-    <script th:src="@{/js/axios/dist/axios.js}"></script>
+
 </head>
 <body>
 <div id="app">
@@ -17,7 +16,7 @@
             <td th:text="${fileName}"></td>
             <td><a href="#" th:href="@{/download/{downFileName}/(downFileName=${fileName},(parentPath=${parentPath}))}">下载</a>
             </td>
-            <td><a href="#" th:href="@{/rename(oldName=${fileName},(parentPath=${parentPath}))}">重命名</a></td>
+
         </tr>
 
         <br> <br>
