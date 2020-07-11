@@ -1,5 +1,7 @@
 package cn.tyl.file.controller;
 
+import cn.tyl.file.commons.FileInfo;
+import cn.tyl.file.commons.R;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -12,11 +14,12 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.util.ArrayList;
 
-@Controller
+@RestController
 public class FileController {
 
     @Value("${file.path}")
     String basePath;
+
 
     @PostMapping("/upload")
     @ResponseBody
@@ -43,10 +46,11 @@ public class FileController {
     /*
      *实现文件下载
      */
-    @RequestMapping("/file")
-    public String fileDownload(Model model,
-                               @RequestParam(value = "parentPath", required = false) String parentPath,
-                               @RequestParam(value = "childPath", required = false) String childPath) {
+
+    @GetMapping("/file")
+    public R fileDownload(Model model,
+                          @RequestParam(value = "parentPath", required = false) String parentPath,
+                          @RequestParam(value = "childPath", required = false) String childPath) {
 
 
         if (StringUtils.isEmpty(parentPath)){
@@ -66,14 +70,15 @@ public class FileController {
         ArrayList files = new ArrayList();
         ArrayList directorys = new ArrayList();
 
+
         if (fs != null) {
             for (File f : fs) {                //遍历File[]数组
                 String fileName = f.getName();  //获取文件和目录名
                 if (!f.isDirectory()) {  //另外可用fileName.endsWith("txt")来过滤出以txt结尾的文件
 
-                    files.add(fileName);
+                    files.add(new FileInfo(fileName,null));
                 } else {
-                    directorys.add(fileName);
+                    directorys.add(new FileInfo(fileName,null));
                 }
 
             }
@@ -84,12 +89,12 @@ public class FileController {
         }
 
 
-        model.addAttribute("inputPath", inputPath);
-        model.addAttribute("fileNames", files);
-        model.addAttribute("directoryNames", directorys);
-        model.addAttribute("parentPath",parentPath);
 
-        return "download";
+
+        return R.ok().data("inputPath", inputPath)
+                .data("fileNames", files)
+                .data("directoryNames", directorys)
+                .data("parentPath",parentPath);
     }
 
 
