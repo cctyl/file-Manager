@@ -2,6 +2,7 @@ package cn.tyl.file.controller;
 
 import cn.tyl.file.commons.FileInfo;
 import cn.tyl.file.commons.R;
+import cn.tyl.file.utils.FileUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -23,7 +24,7 @@ public class FileController {
 
     @PostMapping("/upload")
     @ResponseBody
-    public Object uploadFile(@RequestParam("file") MultipartFile file, HttpServletRequest request) {
+    public R uploadFile(@RequestParam("file") MultipartFile file, HttpServletRequest request) {
 
 
         File directory = new File(basePath);
@@ -39,29 +40,32 @@ public class FileController {
             e.printStackTrace();
         }
 
-        return "上传成功";
+        return R.ok().message("上传成功");
     }
 
 
-    /*
-     *实现文件下载
+    /**
+     * 获取文件列表数据
+     *
+     * @param parentPath
+     * @param childPath
+     * @return
      */
-
     @GetMapping("/file")
-    public R fileDownload(Model model,
-                          @RequestParam(value = "parentPath", required = false) String parentPath,
-                          @RequestParam(value = "childPath", required = false) String childPath) {
+    public R fileDownload(
+            @RequestParam(value = "parentPath", required = false) String parentPath,
+            @RequestParam(value = "childPath", required = false) String childPath) {
 
 
-        if (StringUtils.isEmpty(parentPath)){
-            parentPath="";
+        if (StringUtils.isEmpty(parentPath)) {
+            parentPath = "";
         }
 
 
         if (!StringUtils.isEmpty(childPath)) {
-            parentPath +=  "/"+childPath+"/";
+            parentPath += "/" + childPath + "/";
         }
-        String inputPath =basePath+ parentPath;
+        String inputPath = basePath + parentPath;
 
 
         File file = new File(inputPath);      //获取其file对象
@@ -76,9 +80,9 @@ public class FileController {
                 String fileName = f.getName();  //获取文件和目录名
                 if (!f.isDirectory()) {  //另外可用fileName.endsWith("txt")来过滤出以txt结尾的文件
 
-                    files.add(new FileInfo(fileName,null));
+                    files.add(new FileInfo(fileName, null));
                 } else {
-                    directorys.add(new FileInfo(fileName+"——————>d",null));
+                    directorys.add(new FileInfo(fileName + "——————>d", null));
                 }
 
             }
@@ -89,17 +93,45 @@ public class FileController {
         }
 
 
-
-
         return R.ok().data("inputPath", inputPath)
                 .data("fileNames", files)
                 .data("directoryNames", directorys)
-                .data("parentPath",parentPath);
+                .data("parentPath", parentPath);
     }
 
+    /**
+     * 删除文件
+     *
+     * @param parentPath
+     * @param childPath
+     * @return
+     */
+    @DeleteMapping("/file")
+    public R deleteFile(@RequestParam(value = "parentPath", required = false) String parentPath,
+                        @RequestParam(value = "childPath", required = false) String childPath) {
+
+        //拼接文件路径
+        if (StringUtils.isEmpty(parentPath)) {
+            parentPath = "";
+        }
+        if (!StringUtils.isEmpty(childPath)) {
+            parentPath += "/" + childPath + "/";
+        }
+        String inputPath = basePath + parentPath;
+
+        boolean b = FileUtils.deleteFile(inputPath);
+        if (b){
+            return R.ok();
+        }else {
+            return R.error();
+        }
+
+
+    }
 
     /**
      * 下载文件
+     *
      * @param downFileName
      * @param parentPath
      * @param response
@@ -113,7 +145,7 @@ public class FileController {
             throws UnsupportedEncodingException {
 
         String filename = downFileName;
-        String filePath = basePath+parentPath;
+        String filePath = basePath + parentPath;
         File file = new File(filePath + "/" + filename);
         if (file.exists()) {
             //判断文件父目录是否存在
@@ -159,6 +191,7 @@ public class FileController {
 
     /**
      * 重命名文件
+     *
      * @param oldName
      * @param parentPath
      * @param response
@@ -167,25 +200,25 @@ public class FileController {
      */
     @GetMapping("/rename")
     public String rename(@RequestParam("oldName") String oldName,
-                           @RequestParam(value = "parentPath",required = false) String parentPath,
-                           @RequestParam("newName") String newName,
-                           HttpServletResponse response)
+                         @RequestParam(value = "parentPath", required = false) String parentPath,
+                         @RequestParam("newName") String newName,
+                         HttpServletResponse response)
             throws UnsupportedEncodingException {
 
-        if (StringUtils.isEmpty(parentPath)){
-            parentPath="";
+        if (StringUtils.isEmpty(parentPath)) {
+            parentPath = "";
         }
         String filename = oldName;
-        String filePath = basePath+parentPath;
+        String filePath = basePath + parentPath;
         File oldfile = new File(filePath + "/" + filename);
-        File newFile =  new File(filePath+"/"+newName);
+        File newFile = new File(filePath + "/" + newName);
         if (oldfile.exists()) {
             //判断文件父目录是否存在
 
             oldfile.renameTo(newFile);
         }
 
-        return "redirect:/file?parentPath="+parentPath;
+        return "redirect:/file?parentPath=" + parentPath;
     }
 
 }
