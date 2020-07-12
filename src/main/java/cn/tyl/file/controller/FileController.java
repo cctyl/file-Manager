@@ -78,7 +78,7 @@ public class FileController {
 
                     files.add(new FileInfo(fileName,null));
                 } else {
-                    directorys.add(new FileInfo(fileName+" -d",null));
+                    directorys.add(new FileInfo(fileName+"——————>d",null));
                 }
 
             }
