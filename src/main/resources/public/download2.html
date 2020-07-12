@@ -34,7 +34,7 @@
          </tr>
 
      </table>-->
-
+    <el-button  @click="returnLastPath" type="success" round >返回上级目录</el-button>
     <el-table
             ref="multipleTable"
             :data="tableData"
@@ -79,9 +79,10 @@
 <script>
     const app = new Vue({
             el: "#app",
-            inputPath: "",
-            parentPath: "",
+
             data: {
+                lastPath: [],
+                parentPath: "",
                 tableData: [{
                     size: 0,
                     name: "",
@@ -95,10 +96,31 @@
                 this.initPage();
             },
             methods: {
+                //返回上一级目录
+                returnLastPath(){
+                    var path = this.lastPath.pop();
+                    axios.get(`/file?parentPath=${path}`).then(
+                        response => {
+
+                            //获取文件列表数据
+                            var fileNames = response.data.data.fileNames;
+                            var directoryNames = response.data.data.directoryNames;
+
+                            this.tableData = directoryNames.concat(fileNames);
+
+                            //获取上传路径
+                            this.inputPath = response.data.data.inputPath;
+                            //获取父路径
+                            this.parentPath = response.data.data.parentPath;
+                        }
+                    ).catch();
+
+                },
                 getFileList(parentPath="",childPath=""){
                     axios.get(`/file?parentPath=${parentPath}&childPath=${childPath}`).then(
                         response => {
-
+                            var last = this.lastPath;
+                            last.push(this.parentPath);
                             //获取文件列表数据
                             var fileNames = response.data.data.fileNames;
                             var directoryNames = response.data.data.directoryNames;
