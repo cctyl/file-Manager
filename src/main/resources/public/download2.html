@@ -70,6 +70,7 @@
             <template slot-scope="scope">
                 <el-button v-if="scope.row.type=='文件夹'" @click="getFileList(parentPath,scope.row.name)" type="text" size="small">查看文件夹</el-button>
                 <el-button type="text" size="small" @click="rename(scope.row.name,parentPath)">重命名</el-button>
+                <el-button type="text" size="small"  @click="deleteFile(parentPath,scope.row.name)" >删除</el-button>
             </template>
         </el-table-column>
     </el-table>
@@ -81,6 +82,7 @@
             el: "#app",
 
             data: {
+                inputPath:"",
                 lastPath: [],
                 parentPath: "",
                 tableData: [{
@@ -124,8 +126,15 @@
                             last.push(this.parentPath);
                             //获取文件列表数据
                             var fileNames = response.data.data.fileNames;
-                            var directoryNames = response.data.data.directoryNames;
+                            //防止因为无文件和出现错误
+                            if(fileNames==null|| fileNames=="null"){
+                                fileNames="";
+                            }
 
+                            var directoryNames = response.data.data.directoryNames;
+                            if(directoryNames==null|| directoryNames=="null"){
+                                directoryNames="";
+                            }
                             this.tableData = directoryNames.concat(fileNames);
 
                             //获取上传路径
@@ -140,7 +149,7 @@
                 rename(oldName,parentPath=""){
 
 
-                    this.$prompt('请输入邮箱', '提示', {
+                    this.$prompt('请输入新名字', '提示', {
                         confirmButtonText: '确定',
                         cancelButtonText: '取消',
                         inputValue:oldName
@@ -165,6 +174,36 @@
                     });
 
 
+
+                },
+
+                //删除文件
+                deleteFile(parentPath="",childPath){
+
+                    console.log("删除文件")
+                    this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
+                        confirmButtonText: '确定',
+                        cancelButtonText: '取消',
+                        type: 'warning'
+                    }).then(() => {
+                        axios.delete(`/file?parentPath=${parentPath}&childPath=${childPath}`).then(
+                            reponse=>{
+                                this.$message({
+                                    showClose: true,
+                                    message: `删除${childPath}成功`,
+                                    type: 'success'
+                                });
+
+                                this.getFileList(parentPath);
+                            }
+                        ).catch();
+
+                    }).catch(() => {
+                        this.$message({
+                            type: 'info',
+                            message: '已取消删除'
+                        });
+                    });
 
                 },
 
