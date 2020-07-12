@@ -89,13 +89,13 @@ public class FileController {
                 String fileName = f.getName();  //获取文件和目录名
                 if (!f.isDirectory()) {  //另外可用fileName.endsWith("txt")来过滤出以txt结尾的文件
                     //计算文件大小，单位是 M
-                    long length = file.length()/(1024*1024);
+                    long length = f.length()/(1024*1024);
                     if (length<=0){
                         length=1;
                     }
-                    files.add(new FileInfo(fileName, null,length));
+                    files.add(new FileInfo(fileName, null,length,"文件"));
                 } else {
-                    directorys.add(new FileInfo(fileName + "——————>d", null,null));
+                    directorys.add(new FileInfo(fileName, null,null,"文件夹"));
                 }
 
             }
