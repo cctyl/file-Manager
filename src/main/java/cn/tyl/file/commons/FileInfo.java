@@ -11,4 +11,5 @@ public class FileInfo {
 
     private String name;
     private String url;
+    private Long size;
 }
