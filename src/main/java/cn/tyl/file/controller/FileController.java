@@ -151,8 +151,8 @@ public class FileController {
      * @return
      * @throws UnsupportedEncodingException
      */
-    @GetMapping("/download/{downFileName}")
-    public String downLoad(@PathVariable String downFileName,
+    @GetMapping("/download")
+    public void downLoad(@RequestParam String downFileName,
                            @RequestParam("parentPath") String parentPath,
                            HttpServletResponse response)
             throws UnsupportedEncodingException {
@@ -198,7 +198,7 @@ public class FileController {
                 e.printStackTrace();
             }
         }
-        return null;
+
     }
 
 

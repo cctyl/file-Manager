@@ -17,7 +17,7 @@
          <tr th:if="${fileNames==null}">当前目录无文件</tr>
          <tr th:each="fileName : ${fileNames}">
              <td th:text="${fileName}"></td>
-             <td><a href="#" th:href="@{/download/{downFileName}/(downFileName=${fileName},(parentPath=${parentPath}))}">下载</a>
+
              </td>
 
          </tr>
@@ -106,6 +106,9 @@
                     </el-button>
                     <el-button type="text" size="small" @click="rename(scope.row.name,parentPath)">重命名</el-button>
                     <el-button type="text" size="small" @click="deleteFile(parentPath,scope.row.name)">删除</el-button>
+
+                    <el-link v-if="scope.row.type!='文件夹'" type="primary"  :href="'/download?downFileName='+scope.row.name+'&parentPath='+parentPath">下载</el-link>
+
                 </template>
             </el-table-column>
         </el-table>
@@ -135,6 +138,8 @@
                 this.initPage();
             },
             methods: {
+
+
                 //返回上一级目录
                 returnLastPath() {
                     var path = this.lastPath.pop();
