@@ -19,7 +19,12 @@
                         style="width: 100px; height: 100px"
                         :src="url"
                         :fit="fit"
-                ></el-image>
+                >
+                    <div slot="error" class="image-slot">
+                        <i class="el-icon-picture-outline"></i>
+                    </div>
+
+                </el-image>
             </div>
 
 
@@ -57,12 +62,12 @@
                 username: '',
                 password: ''
             },
-            fits: ['fill'],
+            fit: 'fill',
             url: "http://localhost:8083/icon/login_img.jpg"
 
         },
 
-        create() {
+        created() {
 
             this.testLogin();
 
