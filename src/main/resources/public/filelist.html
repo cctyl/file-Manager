@@ -34,46 +34,82 @@
          </tr>
 
      </table>-->
-    <el-button  @click="returnLastPath" type="success" round >返回上级目录</el-button>
-    <el-table
-            ref="multipleTable"
-            :data="tableData"
-            tooltip-effect="dark"
-            style="width: 100%"
-            @selection-change="handleSelectionChange">
-        <el-table-column
-                type="selection"
-                width="55">
-        </el-table-column>
 
-        <el-table-column
-                prop="name"
-                label="文件名"
-               >
-        </el-table-column>
-        <el-table-column
-                prop="type"
-                label="类型"
-                width="120"
-                show-overflow-tooltip>
-        </el-table-column>
-        <el-table-column
-                prop="size"
-                label="大小"
-                width="120"
-                show-overflow-tooltip>
-        </el-table-column>
-        <el-table-column
-                fixed="right"
-                label="操作"
-                >
-            <template slot-scope="scope">
-                <el-button v-if="scope.row.type=='文件夹'" @click="getFileList(parentPath,scope.row.name)" type="text" size="small">查看文件夹</el-button>
-                <el-button type="text" size="small" @click="rename(scope.row.name,parentPath)">重命名</el-button>
-                <el-button type="text" size="small"  @click="deleteFile(parentPath,scope.row.name)" >删除</el-button>
-            </template>
-        </el-table-column>
-    </el-table>
+    <el-header style="text-align: center">当前路径：{{inputPath}}</el-header>
+    <el-main>
+        <el-row>
+
+
+            <el-col :span="4">
+                <div class="grid-content bg-purple-light">
+                    <el-button @click="returnLastPath" type="success" round>返回上级目录</el-button>
+                </div>
+            </el-col>
+
+            <el-col :span="4">
+                <div class="grid-content bg-purple">
+                    <el-upload
+                            class="upload-demo"
+                            action="/upload"
+                            :on-preview="handlePreview"
+                            :on-remove="handleRemove"
+                            :before-remove="beforeRemove"
+                            multiple
+                            :on-success="onSuccess"
+                    >
+
+
+                        <el-button type="primary" round>点击上传</el-button>
+
+
+                    </el-upload>
+                </div>
+            </el-col>
+        </el-row>
+
+
+        <el-table
+                ref="multipleTable"
+                :data="tableData"
+                tooltip-effect="dark"
+                style="width: 100%"
+                @selection-change="handleSelectionChange">
+            <el-table-column
+                    type="selection"
+                    width="55">
+            </el-table-column>
+
+            <el-table-column
+                    prop="name"
+                    label="文件名"
+            >
+            </el-table-column>
+            <el-table-column
+                    prop="type"
+                    label="类型"
+                    width="120"
+                    show-overflow-tooltip>
+            </el-table-column>
+            <el-table-column
+                    prop="size"
+                    label="大小"
+                    width="120"
+                    show-overflow-tooltip>
+            </el-table-column>
+            <el-table-column
+                    fixed="right"
+                    label="操作"
+            >
+                <template slot-scope="scope">
+                    <el-button v-if="scope.row.type=='文件夹'" @click="getFileList(parentPath,scope.row.name)" type="text"
+                               size="small">查看文件夹
+                    </el-button>
+                    <el-button type="text" size="small" @click="rename(scope.row.name,parentPath)">重命名</el-button>
+                    <el-button type="text" size="small" @click="deleteFile(parentPath,scope.row.name)">删除</el-button>
+                </template>
+            </el-table-column>
+        </el-table>
+    </el-main>
 </div>
 
 
@@ -82,8 +118,9 @@
             el: "#app",
 
             data: {
-                inputPath:"",
+                inputPath: "",
                 lastPath: [],
+                fileList: [],
                 parentPath: "",
                 tableData: [{
                     size: 0,
@@ -99,7 +136,7 @@
             },
             methods: {
                 //返回上一级目录
-                returnLastPath(){
+                returnLastPath() {
                     var path = this.lastPath.pop();
                     axios.get(`/file?parentPath=${path}`).then(
                         response => {
@@ -119,7 +156,7 @@
 
                 },
                 //获取文件列表
-                getFileList(parentPath="",childPath=""){
+                getFileList(parentPath = "", childPath = "") {
                     axios.get(`/file?parentPath=${parentPath}&childPath=${childPath}`).then(
                         response => {
                             var last = this.lastPath;
@@ -127,13 +164,13 @@
                             //获取文件列表数据
                             var fileNames = response.data.data.fileNames;
                             //防止因为无文件和出现错误
-                            if(fileNames==null|| fileNames=="null"){
-                                fileNames="";
+                            if (fileNames == null || fileNames == "null") {
+                                fileNames = "";
                             }
 
                             var directoryNames = response.data.data.directoryNames;
-                            if(directoryNames==null|| directoryNames=="null"){
-                                directoryNames="";
+                            if (directoryNames == null || directoryNames == "null") {
+                                directoryNames = "";
                             }
                             this.tableData = directoryNames.concat(fileNames);
 
@@ -146,17 +183,17 @@
                 },
 
                 //文件重命名
-                rename(oldName,parentPath=""){
+                rename(oldName, parentPath = "") {
 
 
                     this.$prompt('请输入新名字', '提示', {
                         confirmButtonText: '确定',
                         cancelButtonText: '取消',
-                        inputValue:oldName
-                    }).then(({ value }) => {
+                        inputValue: oldName
+                    }).then(({value}) => {
 
                         axios.get(`/rename?oldName=${oldName}&newName=${value}&parentPath=${parentPath}`).then(
-                            response=>{
+                            response => {
 
                                 this.$message({
                                     message: '重命名成功',
@@ -174,11 +211,10 @@
                     });
 
 
-
                 },
 
                 //删除文件
-                deleteFile(parentPath="",childPath){
+                deleteFile(parentPath = "", childPath) {
 
                     console.log("删除文件")
                     this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
@@ -187,7 +223,7 @@
                         type: 'warning'
                     }).then(() => {
                         axios.delete(`/file?parentPath=${parentPath}&childPath=${childPath}`).then(
-                            reponse=>{
+                            reponse => {
                                 this.$message({
                                     showClose: true,
                                     message: `删除${childPath}成功`,
@@ -211,6 +247,7 @@
                     console.log("页面初始化");
                     this.getFileList();
                 },
+
                 handleRemove(file, fileList) {
                     console.log(file, fileList);
                     axios.delete(`/file?parentPath=${this.parentPath}&childPath=${file.name}`).then(
@@ -224,9 +261,11 @@
                         }
                     ).catch();
                 },
+
                 beforeRemove(file, fileList) {
                     return this.$confirm(`确定移除 ${file.name}？`);
                 },
+
                 toggleSelection(rows) {
                     if (rows) {
                         rows.forEach(row => {
@@ -236,11 +275,54 @@
                         this.$refs.multipleTable.clearSelection();
                     }
                 },
+
                 handleSelectionChange(val) {
                     this.multipleSelection = val;
+                },
+
+                handleRemove(file) {
+
+                    var vue = this;
+
+                    console.log(this.parentPath);
+
+                    axios.delete(`/file?parentPath=${vue.parentPath}&childPath=${file.name}`).then(
+                        response => {
+                            if (response.data.code == 20000) {
+                                this.$message({
+                                    showClose: true,
+                                    message: `删除${file.name}成功`,
+                                    type: 'success'
+                                });
+                            }
+
+
+                        }
+                    ).catch();
+                },
+
+                handlePreview(file) {
+                    console.log(file);
+                },
+
+
+                beforeRemove(file) {
+                    return this.$confirm(`确定移除 ${file.name}？`);
+                },
+
+                onSuccess(response, file) {
+                    this.$message({
+                        showClose: true,
+                        message: `上传${file.name}成功`,
+                        type: 'success'
+                    });
+                    this.getFileList(this.parentPath);
+
+
                 }
 
-            }
+            },
+
 
         })
     ;

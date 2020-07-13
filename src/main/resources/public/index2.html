@@ -26,6 +26,8 @@
         >
             <el-button size="small" type="primary">点击上传</el-button>
 
+            <el-button size="small" type="success" @click="toOtherPage('/filelist.html')" >文件列表</el-button>
+
         </el-upload>
     </el-main>
 
@@ -48,6 +50,9 @@
         },
         methods: {
 
+            toOtherPage(path){
+                window.location.href=path;
+            },
             //获取文件列表
             getFileList(){
                 axios.get(`/file`).then(
