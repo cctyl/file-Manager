@@ -10,43 +10,30 @@
 </head>
 <body>
 <div id="app">
-    <!-- 当前目录：<span th:text="${parentPath}" id="parentPath"></span>
-     <table>
 
-         <br>
-         <tr th:if="${fileNames==null}">当前目录无文件</tr>
-         <tr th:each="fileName : ${fileNames}">
-             <td th:text="${fileName}"></td>
 
-             </td>
 
-         </tr>
-
-         <br> <br>
-
-         子目录：<br>
-         <tr th:if="${directoryNames==null}">当前目录无子目录</tr>
-
-         <tr th:each="directoryName : ${directoryNames}">
-             <td th:text="${directoryName}" class="par"></td>
-             <td><a href="#" th:href="@{/file/(childPath=${directoryName},parentPath=${parentPath})}">打开</a></td>
-
-         </tr>
-
-     </table>-->
-
-    <el-header style="text-align: center">当前路径：{{inputPath}}</el-header>
     <el-main>
         <el-row>
+            <el-col style="text-align: center" >
+
+                <span style="color: #409EFF">
+                     当前路径：{{inputPath}}
+                </span>
 
 
-            <el-col :span="4">
+            </el-col>
+        </el-row>
+        <el-row>
+
+            <el-col :span="3"> </el-col>
+            <el-col :span="15">
                 <div class="grid-content bg-purple-light">
                     <el-button @click="returnLastPath" type="success" round>返回上级目录</el-button>
                 </div>
             </el-col>
 
-            <el-col :span="4">
+            <el-col :span="8">
                 <div class="grid-content bg-purple">
                     <el-upload
                             class="upload-demo"

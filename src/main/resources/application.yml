@@ -18,3 +18,8 @@ spring:
 
 file:
   path: E:\迅雷下载\
+
+user:
+  data:
+    uname: admin
+    upwd: admin
