@@ -63,6 +63,7 @@ public class MyMvcConfig implements WebMvcConfigurer {
                 .excludePathPatterns("/index.html","/","/login","/swagger*",
                         "/actuator/**","/swagger*/**","/webjars/**","/error","/*.html","/**/*.html","/**/*.css","/**/*.js","/**/*.png"
                         ,"/**/*.jpg"
+                        ,"/icon/**"
                         );
     }
 

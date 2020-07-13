@@ -11,17 +11,41 @@
 <body>
 
 <div id="app">
-    <el-form :label-position="labelPosition" label-width="80px" :model="formLabelAlign">
-        <el-form-item label="用户名">
-            <el-input v-model="formLabelAlign.username"></el-input>
-        </el-form-item>
-        <el-form-item label="密码">
-            <el-input type="password" v-model="formLabelAlign.password"></el-input>
-        </el-form-item>
-        <el-form-item>
-            <el-button type="primary" @click="login()">登录</el-button>
-        </el-form-item>
-    </el-form>
+
+    <el-container>
+        <el-header>
+            <div class="grid-content bg-purple" style="text-align: center">
+                <el-image
+                        style="width: 100px; height: 100px"
+                        :src="url"
+                        :fit="fit"
+                ></el-image>
+            </div>
+
+
+            <div class="grid-content bg-purple" style="text-align: center">登陆</div>
+
+
+        </el-header>
+        <el-main>
+            <br>
+            <br>
+            <br>
+            <el-form :label-position="labelPosition" label-width="80px" :model="formLabelAlign">
+                <el-form-item label="用户名">
+                    <el-input v-model="formLabelAlign.username"></el-input>
+                </el-form-item>
+                <el-form-item label="密码">
+                    <el-input type="password" v-model="formLabelAlign.password"></el-input>
+                </el-form-item>
+                <el-form-item>
+                    <el-button type="primary" @click="login()">登录</el-button>
+                </el-form-item>
+            </el-form>
+        </el-main>
+    </el-container>
+
+
 </div>
 <script>
     const app = new Vue({
@@ -32,15 +56,23 @@
             formLabelAlign: {
                 username: '',
                 password: ''
-            }
+            },
+            fits: ['fill'],
+            url: "http://localhost:8083/icon/login_img.jpg"
+
         },
 
         create() {
 
             this.testLogin();
+
         },
         methods: {
 
+            getPath() {
+                console.log("当前路径：" + this.$route.path);
+                return this.$route.path;
+            },
             testLogin() {
 
                 axios.get("/who").then(
@@ -49,7 +81,7 @@
                         if (response.data.code == 20000) {
 
                             window.location.href = "/filelist.html";
-                        }else {
+                        } else {
                             this.$message("尚未登陆，请登陆");
                         }
 
