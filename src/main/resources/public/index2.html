@@ -12,7 +12,7 @@
 
 
 <el-container id="app">
-    <el-header style="text-align: center">文件上传路径：</el-header>
+    <el-header style="text-align: center">当前文件上传路径：{{inputPath}}</el-header>
     <el-main>
         <el-upload
                 class="upload-demo"
@@ -36,27 +36,46 @@
 <script>
     const app = new Vue({
         el: "#app",
-        inputPath: "",
-        parentPath:"",
+
         data: {
+            inputPath: "",
+            parentPath:"",
             fileList: []
         },
         created() {
 
+            this.getFileList();
         },
         methods: {
 
-
+            //获取文件列表
+            getFileList(){
+                axios.get(`/file`).then(
+                    response => {
+                        //获取上传路径
+                        this.inputPath = response.data.data.inputPath;
+                        //获取父路径
+                        this.parentPath = response.data.data.parentPath;
+                    }
+                ).catch();
+            },
 
             handleRemove(file, fileList) {
-                console.log(file, fileList);
-                axios.delete(`/file?parentPath=${this.parentPath}&childPath=${file.name}`).then(
-                    reponse=>{
-                        this.$message({
-                            showClose: true,
-                            message: `删除${file.name}成功`,
-                            type: 'success'
-                        });
+
+                var vue = this;
+
+                console.log(this.parentPath);
+
+                axios.delete(`/file?parentPath=${vue.parentPath}&childPath=${file.name}`).then(
+                    response=>{
+                        if(response.data.code == 20000){
+                            this.$message({
+                                showClose: true,
+                                message: `删除${file.name}成功`,
+                                type: 'success'
+                            });
+                        }
+
 
                     }
                 ).catch();
