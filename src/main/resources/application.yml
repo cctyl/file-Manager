@@ -17,7 +17,7 @@ spring:
 
 
 file:
-  path: E:\迅雷下载\
+  path: E:/迅雷下载/
 
 user:
   data:

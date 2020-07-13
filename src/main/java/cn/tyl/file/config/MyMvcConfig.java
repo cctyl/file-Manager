@@ -61,7 +61,8 @@ public class MyMvcConfig implements WebMvcConfigurer {
         //静态资源：springboot已经做好了静态资源映射，不用我们处理
         registry.addInterceptor( loginHandlerInterceptor() ).addPathPatterns("/**")
                 .excludePathPatterns("/index.html","/","/login","/swagger*",
-                        "/actuator/**","/swagger*/**","/webjars/**","/error"
+                        "/actuator/**","/swagger*/**","/webjars/**","/error","/*.html","/**/*.html","/**/*.css","/**/*.js","/**/*.png"
+                        ,"/**/*.jpg"
                         );
     }
 

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>登录</title>
+    <link rel="stylesheet" href="/element-ui/lib/theme-chalk/index.css">
+    <script src="/vue/dist/vue.js"></script>
+    <script src="/axios/dist/axios.js"></script>
+    <script src="/element-ui/lib/index.js"></script>
+</head>
+<body>
+
+<div id="app">
+    <el-form :label-position="labelPosition" label-width="80px" :model="formLabelAlign">
+        <el-form-item label="用户名">
+            <el-input v-model="formLabelAlign.username"></el-input>
+        </el-form-item>
+        <el-form-item label="密码">
+            <el-input type="password" v-model="formLabelAlign.password"></el-input>
+        </el-form-item>
+        <el-form-item>
+            <el-button type="primary" @click="login()">登录</el-button>
+        </el-form-item>
+    </el-form>
+</div>
+<script>
+    const app = new Vue({
+
+        el: "#app",
+        data: {
+            labelPosition: 'right',
+            formLabelAlign: {
+                username: '',
+                password: ''
+            }
+        },
+
+        create() {
+
+            this.testLogin();
+        },
+        methods: {
+
+            testLogin() {
+
+                axios.get("/who").then(
+                    response => {
+
+                        if (response.data.code == 20000) {
+
+                            window.location.href = "/filelist.html";
+                        }else {
+                            this.$message("尚未登陆，请登陆");
+                        }
+
+                    }
+                ).catch(
+                    error => {
+                        this.$message.error("出错了：" + error);
+
+                    }
+                );
+            },
+            login() {
+
+                axios.post("/login",
+                    {
+                        username: this.formLabelAlign.username,
+                        password: this.formLabelAlign.password
+                    }
+                ).then(
+                    response => {
+                        console.log(response.data.code);
+                        if (response.data.code == 20000) {
+                            //登录成功
+                            window.location.href = "/filelist.html";
+                        } else {
+                            //登录失败
+                            this.$message.error('用户名或者密码错误');
+                        }
+
+                    }
+                ).catch(
+                    error => {
+                        this.$message.error("出错了：" + error);
+
+                    }
+                );
+
+            }
+        }
+
+    });
+
+</script>
+</body>
+</html>
