@@ -37,7 +37,7 @@
                 <div class="grid-content bg-purple">
                     <el-upload
                             class="upload-demo"
-                            action="/upload"
+                            :action="getUploadUrl()"
                             :on-preview="handlePreview"
                             :on-remove="handleRemove"
                             :before-remove="beforeRemove"
@@ -118,7 +118,8 @@
                     url: ""
 
                 }],
-                multipleSelection: []
+                multipleSelection: [],
+                url:"/upload?parentPath="+this.parentPath
 
             },
             created() {
@@ -126,7 +127,9 @@
             },
             methods: {
 
-
+                getUploadUrl(){
+                    return "/upload?parentPath="+this.parentPath;
+                },
                 //返回上一级目录
                 returnLastPath() {
                     var path = this.lastPath.pop();

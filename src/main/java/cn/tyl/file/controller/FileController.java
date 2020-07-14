@@ -30,10 +30,14 @@ public class FileController {
      */
     @PostMapping("/upload")
     @ResponseBody
-    public R uploadFile(@RequestParam("file") MultipartFile file, HttpServletRequest request) {
+    public R uploadFile(@RequestParam("file") MultipartFile file, HttpServletRequest request,
+                        @RequestParam(value = "parentPath", required = false) String parentPath) {
 
+        if (parentPath.equals("undefined")){
+            parentPath = "";
+        }
 
-        File directory = new File(basePath);
+        File directory = new File(basePath+"/"+parentPath);
         if (!directory.exists()) {
             directory.mkdirs();
         }
