@@ -92,7 +92,7 @@ public class FileController {
             @RequestParam(value = "childPath", required = false) String childPath) {
 
 
-        if (StringUtils.isEmpty(parentPath)) {
+        if (StringUtils.isEmpty(parentPath)||parentPath.equals("undefined")) {
             parentPath = "";
         }
 
