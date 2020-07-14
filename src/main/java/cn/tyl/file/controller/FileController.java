@@ -22,6 +22,31 @@ public class FileController {
     String basePath;
 
 
+    @GetMapping("/createdir")
+    public R createDirectory(@RequestParam(value = "parentPath", required = false,defaultValue = "") String parentPath,
+                             @RequestParam(value = "dirName") String dirName){
+
+        if (!StringUtils.isEmpty(dirName)&& !dirName.equals("undefined")){
+
+
+
+            String dirPath = basePath+"/"+parentPath+"/"+dirName;
+            File directory = new File(dirPath);
+            //不存在就创建，存在就提示
+            if (!directory.exists()){
+                directory.mkdirs();
+            }else {
+                return R.error().message("文件夹已经存在");
+            }
+            return R.ok().message("文件夹："+dirName+"创建成功");
+
+        }else {
+            return R.error().message("参数有误");
+        }
+
+    }
+
+
     /**
      * 文件上传
      * @param file

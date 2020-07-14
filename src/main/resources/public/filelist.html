@@ -26,10 +26,15 @@
         </el-row>
         <el-row>
 
-            <el-col :span="3"> </el-col>
-            <el-col :span="15">
+
+            <el-col :span="8">
                 <div class="grid-content bg-purple-light">
                     <el-button @click="returnLastPath" type="success" round>返回上级目录</el-button>
+                </div>
+            </el-col>
+            <el-col :span="8">
+                <div class="grid-content bg-purple-light">
+                    <el-button @click="createDir" type="success" round>创建新目录</el-button>
                 </div>
             </el-col>
 
@@ -126,7 +131,35 @@
                 this.initPage();
             },
             methods: {
+                //创建新目录
+                createDir(){
 
+                    this.$prompt('输入文件夹名字', '提示', {
+                        confirmButtonText: '确定',
+                        cancelButtonText: '取消'
+                    }).then(({ value }) => {
+
+                        axios.get(`/createdir?dirName=${value}&parentPath=${this.parentPath}`).then(
+                            response=>{
+                                if (response.data.code==20000){
+                                    this.getFileList(this.parentPath);
+                                    this.$message({
+                                        type: 'success',
+                                        message: '创建成功'
+                                    });
+
+                                }
+                            }
+                        ).catch();
+
+
+                    }).catch(() => {
+                        this.$message({
+                            type: 'info',
+                            message: '取消操作'
+                        });
+                    });
+                },
                 getUploadUrl(){
                     return "/upload?parentPath="+this.parentPath;
                 },
