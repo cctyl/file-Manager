@@ -1,5 +1,7 @@
 ### 远程文件管理器使用说明 
 
+​	演示视频：https://www.bilibili.com/video/av371330962
+
 ​	使用要求：
 
 ​			需要安装jdk8 以上
