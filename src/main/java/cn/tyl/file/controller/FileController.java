@@ -3,9 +3,8 @@ package cn.tyl.file.controller;
 import cn.tyl.file.commons.FileInfo;
 import cn.tyl.file.commons.R;
 import cn.tyl.file.utils.FileUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -16,6 +15,7 @@ import java.io.*;
 import java.util.ArrayList;
 
 @RestController
+@Slf4j
 public class FileController {
 
     @Value("${file.path}")
@@ -106,11 +106,8 @@ public class FileController {
         File file = new File(inputPath);      //获取其file对象
         File[] fs = file.listFiles();     //遍历path下的文件和目录，放在File数组中
 
-        ArrayList files = new ArrayList();
-        ArrayList directorys = new ArrayList();
-
-
-
+        ArrayList<FileInfo> files = new ArrayList<>();
+        ArrayList<FileInfo> directorys = new ArrayList<>();
 
 
         if (fs != null) {
@@ -133,8 +130,6 @@ public class FileController {
             files = null;
             directorys = null;
         }
-
-
         return R.ok().data("inputPath", inputPath)
                 .data("fileNames", files)
                 .data("directoryNames", directorys)
@@ -167,8 +162,6 @@ public class FileController {
         }else {
             return R.error();
         }
-
-
     }
 
     /**
@@ -186,27 +179,23 @@ public class FileController {
                            HttpServletResponse response)
             throws UnsupportedEncodingException {
 
-        String filename = downFileName;
         String filePath = basePath + parentPath;
-        File file = new File(filePath + "/" + filename);
+        File file = new File(filePath + "/" + downFileName);
         if (file.exists()) {
             //判断文件父目录是否存在
-
             //设置响应头
             response.setContentType("application/vnd.ms-excel;charset=UTF-8");
             response.setCharacterEncoding("UTF-8");
-            response.setHeader("Content-Disposition", "attachment;fileName=" + java.net.URLEncoder.encode(filename, "UTF-8"));
-
+            response.setHeader("Content-Disposition", "attachment;fileName=" + java.net.URLEncoder.encode(downFileName, "UTF-8"));
             //流的对拷
             byte[] buffer = new byte[1024];
-            FileInputStream fis = null; //文件输入流
-            BufferedInputStream bis = null;
-            OutputStream os = null; //输出流
-            try {
+            try (
+                    FileInputStream fis   = new FileInputStream(file);
+                    BufferedInputStream bis = new BufferedInputStream(fis);
+                    OutputStream os =   response.getOutputStream();
+                    ){
                 //获取一个对外的输出流
-                os = response.getOutputStream();
-                fis = new FileInputStream(file);
-                bis = new BufferedInputStream(fis);
+
                 int i = bis.read(buffer);
                 while (i != -1) {
                     os.write(buffer);
@@ -214,18 +203,9 @@ public class FileController {
                 }
 
             } catch (Exception e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
-            System.out.println("----------file download---" + filename);
-
-            try {
-                bis.close();
-                fis.close();
-            } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
+            log.info("----------file download---{}", downFileName);
         }
 
     }
@@ -236,30 +216,23 @@ public class FileController {
      *
      * @param oldName
      * @param parentPath
-     * @param response
      * @return
-     * @throws UnsupportedEncodingException
      */
     @GetMapping("/rename")
     public String rename(@RequestParam("oldName") String oldName,
                          @RequestParam(value = "parentPath", required = false) String parentPath,
-                         @RequestParam("newName") String newName,
-                         HttpServletResponse response)
-            throws UnsupportedEncodingException {
+                         @RequestParam("newName") String newName) {
 
         if (StringUtils.isEmpty(parentPath)) {
             parentPath = "";
         }
-        String filename = oldName;
         String filePath = basePath + parentPath;
-        File oldfile = new File(filePath + "/" + filename);
+        File oldfile = new File(filePath + "/" + oldName);
         File newFile = new File(filePath + "/" + newName);
         if (oldfile.exists()) {
             //判断文件父目录是否存在
-
             oldfile.renameTo(newFile);
         }
-
         return "redirect:/file?parentPath=" + parentPath;
     }
 

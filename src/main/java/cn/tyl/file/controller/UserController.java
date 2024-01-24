@@ -1,15 +1,11 @@
 package cn.tyl.file.controller;
 
 
-import cn.hutool.core.util.IdUtil;
 import cn.tyl.file.commons.R;
 import cn.tyl.file.commons.UserInfo;
-import cn.tyl.file.utils.CookieUtils;
-import cn.tyl.file.utils.RedisUtils;
-import cn.tyl.file.utils.ResponseUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.util.StringUtils;
+import cn.tyl.file.config.AppProperties;
+import cn.tyl.file.utils.AuthUtils;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.Cookie;
@@ -18,18 +14,13 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 @RestController
+@RequiredArgsConstructor
 public class UserController {
 
 
-    @Value("${user.data.uname}")
-    String uname;
 
-    @Value("${user.data.upwd}")
-    String upwd;
-
-    @Autowired
-    RedisUtils redisUtils;
-
+    private final AppProperties appProperties;
+    private final AuthUtils authUtils;
 
     /**
      * 登陆
@@ -44,23 +35,16 @@ public class UserController {
             @RequestBody UserInfo user
     ) {
 
-        if (user.getUsername().equals(uname) && user.getPassword().equals(upwd)) {
+        if (user.getUsername().equals(appProperties.getUname()) && user.getPassword().equals(appProperties.getUpwd())) {
             //登陆成功
-            String simpleUUID = IdUtil.simpleUUID();
-            redisUtils.set("admin", simpleUUID);
-
-            Cookie cookie = new Cookie("loginToken", simpleUUID);
-            //7天 3600*24*7
-            cookie.setMaxAge(604800);
+            Cookie cookie = new Cookie("auth", AuthUtils.generate(appProperties.getUname()));
+            cookie.setMaxAge(43200);
             cookie.setPath(session.getServletContext().getContextPath());
-
             response.addCookie(cookie);
             return R.ok();
         } else {
             return R.error();
         }
-
-
     }
 
     /**
@@ -71,11 +55,8 @@ public class UserController {
      * @return
      */
     @GetMapping("/who")
-    public R testLogin(){
-
-
-        return R.ok();
-
+    public R testLogin(HttpServletRequest request){
+        return R.ok().data("username",AuthUtils.getUsername((String) request.getSession().getAttribute("token")));
     }
 
 }

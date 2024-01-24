@@ -1,5 +1,5 @@
 server:
-  port: 8083
+  port: 9001
 spring:
   http:
     encoding:
@@ -19,7 +19,7 @@ spring:
 file:
   path: E:/迅雷下载/
 
-user:
-  data:
-    uname: admin
-    upwd: admin
+config:
+  uname: admin
+  upwd: admin
+  key: wqqliyYQsJD
