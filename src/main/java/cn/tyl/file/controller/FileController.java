@@ -20,6 +20,12 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
+import java.net.URLEncoder;
+import java.nio.channels.Channels;
+import java.nio.channels.FileChannel;
+import java.nio.channels.WritableByteChannel;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.concurrent.CompletableFuture;
 
@@ -173,35 +179,45 @@ public class FileController {
         }
     }
     @GetMapping("/download")
-    public DeferredResult<ResponseEntity<Resource>> downloadFile(@RequestParam String downFileName,
-                                                                 @RequestParam("parentPath") String parentPath) {
-        DeferredResult<ResponseEntity<Resource>> deferredResult = new DeferredResult<>();
-
+    public void downloadFile(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            @RequestParam String downFileName,
+                             @RequestParam("parentPath") String parentPath) {
         String filePath = basePath + parentPath;
         File file = new File(filePath + "/" + downFileName);
-        if (file.exists()) {
-            // 创建异步任务
-            CompletableFuture.runAsync(() -> {
-                try {
-                    // 读取文件
-                    Resource resource = new FileSystemResource(file);
-
-                    // 设置响应头
-                    HttpHeaders headers = new HttpHeaders();
-                    headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-                    headers.setContentDispositionFormData("attachment", downFileName);
-
-                    // 返回响应
-                    deferredResult.setResult(new ResponseEntity<>(resource, headers, HttpStatus.OK));
-                } catch (Exception e) {
-                    deferredResult.setErrorResult(e);
-                }
-            });
-        } else {
-            deferredResult.setErrorResult(new FileNotFoundException("File not found"));
+        /**
+         * 中文乱码解决
+         */
+        String type = request.getHeader("User-Agent").toLowerCase();
+        String fileName = null;
+        try {
+            if (type.indexOf("firefox") > 0 || type.indexOf("chrome") > 0) {
+                /**
+                 * 谷歌或火狐
+                 */
+                fileName = new String(file.getName().getBytes(StandardCharsets.UTF_8), "iso8859-1");
+            } else {
+                /**
+                 * IE
+                 */
+                fileName = URLEncoder.encode(file.getName(), "UTF-8");
+            }
+            // 设置响应的头部信息
+            response.setHeader("content-disposition", "attachment;filename=" + fileName);
+            // 设置响应内容的类型
+            response.setContentType(fileName + "; charset=UTF-8");
+            response.setContentLength((int) file.length());
+            // 设置响应内容的长度
+            response.setHeader("filename", fileName);
+            //通过文件管道获取飞一般的下载速度
+            WritableByteChannel writableByteChannel = Channels.newChannel(response.getOutputStream());
+            FileChannel fileChannel = new FileInputStream(file.getAbsolutePath()).getChannel();
+            fileChannel.transferTo(0, fileChannel.size(), writableByteChannel);
+        } catch (Exception e) {
+            log.error(e.getMessage(),e);
         }
 
-        return deferredResult;
     }
 
 
