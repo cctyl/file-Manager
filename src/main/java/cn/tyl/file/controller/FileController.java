@@ -4,15 +4,24 @@ import cn.tyl.file.commons.FileInfo;
 import cn.tyl.file.commons.R;
 import cn.tyl.file.utils.FileUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.util.ArrayList;
+import java.util.concurrent.CompletableFuture;
 
 @RestController
 @Slf4j
@@ -163,51 +172,36 @@ public class FileController {
             return R.error();
         }
     }
-
-    /**
-     * 下载文件
-     *
-     * @param downFileName
-     * @param parentPath
-     * @param response
-     * @return
-     * @throws UnsupportedEncodingException
-     */
     @GetMapping("/download")
-    public void downLoad(@RequestParam String downFileName,
-                           @RequestParam("parentPath") String parentPath,
-                           HttpServletResponse response)
-            throws UnsupportedEncodingException {
+    public DeferredResult<ResponseEntity<Resource>> downloadFile(@RequestParam String downFileName,
+                                                                 @RequestParam("parentPath") String parentPath) {
+        DeferredResult<ResponseEntity<Resource>> deferredResult = new DeferredResult<>();
 
         String filePath = basePath + parentPath;
         File file = new File(filePath + "/" + downFileName);
         if (file.exists()) {
-            //判断文件父目录是否存在
-            //设置响应头
-            response.setContentType("application/vnd.ms-excel;charset=UTF-8");
-            response.setCharacterEncoding("UTF-8");
-            response.setHeader("Content-Disposition", "attachment;fileName=" + java.net.URLEncoder.encode(downFileName, "UTF-8"));
-            //流的对拷
-            byte[] buffer = new byte[1024];
-            try (
-                    FileInputStream fis   = new FileInputStream(file);
-                    BufferedInputStream bis = new BufferedInputStream(fis);
-                    OutputStream os =   response.getOutputStream();
-                    ){
-                //获取一个对外的输出流
+            // 创建异步任务
+            CompletableFuture.runAsync(() -> {
+                try {
+                    // 读取文件
+                    Resource resource = new FileSystemResource(file);
 
-                int i = bis.read(buffer);
-                while (i != -1) {
-                    os.write(buffer);
-                    i = bis.read(buffer);
+                    // 设置响应头
+                    HttpHeaders headers = new HttpHeaders();
+                    headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+                    headers.setContentDispositionFormData("attachment", downFileName);
+
+                    // 返回响应
+                    deferredResult.setResult(new ResponseEntity<>(resource, headers, HttpStatus.OK));
+                } catch (Exception e) {
+                    deferredResult.setErrorResult(e);
                 }
-
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            log.info("----------file download---{}", downFileName);
+            });
+        } else {
+            deferredResult.setErrorResult(new FileNotFoundException("File not found"));
         }
 
+        return deferredResult;
     }
 
 
